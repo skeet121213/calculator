@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Супер Калькулятор</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Подключаем Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+    <div class="calculator">
+        <div class="header">
+            <h2>🧮 Супер Калькулятор</h2>
+            <p class="subtitle">Поддерживает очень большие числа</p>
+        </div>
+        
+        <div class="display-container">
+            <input type="text" id="display" class="display" readonly placeholder="0">
+            <div id="history" class="history"></div>
+        </div>
+
+        <div class="buttons">
+            <!-- Первая строка -->
+            <button class="btn function" onclick="clearAll()">C</button>
+            <button class="btn function" onclick="backspace()">⌫</button>
+            <button class="btn function" onclick="appendOperator('(')">(</button>
+            <button class="btn function" onclick="appendOperator(')')">)</button>
+            
+            <!-- Вторая строка -->
+            <button class="btn number" onclick="appendNumber('7')">7</button>
+            <button class="btn number" onclick="appendNumber('8')">8</button>
+            <button class="btn number" onclick="appendNumber('9')">9</button>
+            <button class="btn operator" onclick="appendOperator('/')">÷</button>
+            
+            <!-- Третья строка -->
+            <button class="btn number" onclick="appendNumber('4')">4</button>
+            <button class="btn number" onclick="appendNumber('5')">5</button>
+            <button class="btn number" onclick="appendNumber('6')">6</button>
+            <button class="btn operator" onclick="appendOperator('*')">×</button>
+            
+            <!-- Четвертая строка -->
+            <button class="btn number" onclick="appendNumber('1')">1</button>
+            <button class="btn number" onclick="appendNumber('2')">2</button>
+            <button class="btn number" onclick="appendNumber('3')">3</button>
+            <button class="btn operator" onclick="appendOperator('-')">-</button>
+            
+            <!-- Пятая строка -->
+            <button class="btn number" onclick="appendNumber('0')">0</button>
+            <button class="btn number" onclick="appendDot()">.</button>
+            <button class="btn operator" onclick="appendOperator('+')">+</button>
+            <button class="btn equals" onclick="calculate()">=</button>
+            
+            <!-- Шестая строка (научные функции) -->
+            <button class="btn scientific" onclick="appendFunction('^')">xʸ</button>
+            <button class="btn scientific" onclick="appendFunction('sqrt(')">√</button>
+            <button class="btn scientific" onclick="appendFunction('sin(')">sin</button>
+            <button class="btn scientific" onclick="appendFunction('cos(')">cos</button>
+            
+            <!-- Седьмая строка -->
+            <button class="btn scientific" onclick="appendFunction('tan(')">tan</button>
+            <button class="btn scientific" onclick="appendFunction('log(')">log</button>
+            <button class="btn scientific" onclick="appendConstant('pi')">π</button>
+            <button class="btn scientific" onclick="appendConstant('e')">e</button>
+        </div>
+        
+        <div class="footer">
+            <button class="send-btn" onclick="sendToBot()">📤 Отправить результат в чат</button>
+            <button class="close-btn" onclick="closeApp()">✖ Закрыть</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
