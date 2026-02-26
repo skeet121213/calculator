@@ -36,21 +36,27 @@ function appendNumber(num) {
 }
 
 function appendOperator(op) {
+    // Разрешаем ввод минуса в любом месте (для унарного минуса)
+    if (op === '-') {
+        currentExpression += op;
+        updateDisplay();
+        return;
+    }
+
+    // Для остальных операторов: запрещаем, если последний символ уже оператор (кроме скобок)
     if (currentExpression.length > 0) {
         const lastChar = currentExpression[currentExpression.length - 1];
-        if (!['+', '-', '*', '/', '^', '('].includes(lastChar)) {
+        // Разрешаем оператор после числа или закрывающей скобки
+        if (!['+', '-', '*', '/', '^'].includes(lastChar)) {
             currentExpression += op;
             updateDisplay();
         }
+        // Если последний символ оператор – ничего не делаем (не добавляем)
     } else {
-        // Если выражение пустое, но оператор - это может быть унарный минус
-        if (op === '-') {
-            currentExpression += op;
-            updateDisplay();
-        }
+        // В начале выражения операторы (кроме минуса) не разрешены
+        // (минус уже обработан выше)
     }
 }
-
 function appendFunction(func) {
     currentExpression += func;
     updateDisplay();
