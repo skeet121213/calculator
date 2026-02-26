@@ -134,18 +134,23 @@ function calculate() {
 }
 
 function sendToBot() {
-    if (currentExpression && history.textContent) {
-        // Отправляем результат обратно боту
-        tg.sendData(JSON.stringify({
-            type: 'calculation_result',
-            expression: history.textContent.replace('=', '').trim(),
-            result: currentExpression
-        }));
-    } else {
-        tg.sendData(JSON.stringify({
-            type: 'empty',
-            message: 'Пользователь закрыл калькулятор'
-        }));
+    console.log('=== sendToBot вызвана ===');
+    console.log('currentExpression:', currentExpression);
+    console.log('history.textContent:', history.textContent);
+
+    // Формируем данные для отправки
+    const data = {
+        type: 'calculation_result',
+        expression: history.textContent.replace('=', '').trim() || currentExpression,
+        result: currentExpression
+    };
+    console.log('Данные для отправки:', data);
+
+    try {
+        tg.sendData(JSON.stringify(data));
+        console.log('tg.sendData выполнена успешно');
+    } catch (e) {
+        console.error('Ошибка при отправке:', e);
     }
 }
 
