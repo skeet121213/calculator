@@ -4,16 +4,31 @@ let currentExpression = '';
 
 // Инициализация Telegram WebApp
 const tg = window.Telegram.WebApp;
-tg.expand(); // Разворачиваем на весь экран
-tg.enableClosingConfirmation(); // Подтверждение при закрытии
+tg.expand(); // expand, не extend!
+tg.enableClosingConfirmation();
 
-// Устанавливаем цвета темы
-document.body.style.setProperty('--tg-theme-bg-color', tg.backgroundColor);
-document.body.style.setProperty('--tg-theme-text-color', tg.textColor);
-document.body.style.setProperty('--tg-theme-button-color', tg.buttonColor);
-document.body.style.setProperty('--tg-theme-button-text-color', tg.buttonTextColor);
-document.body.style.setProperty('--tg-theme-hint-color', tg.hintColor);
-document.body.style.setProperty('--tg-theme-secondary-bg-color', tg.secondaryBgColor);
+// Применяем цвета темы Telegram
+document.body.style.backgroundColor = tg.backgroundColor;
+document.body.style.color = tg.textColor;
+
+// Устанавливаем CSS переменные для кнопок
+document.body.style.setProperty('--tg-button-color', tg.buttonColor);
+document.body.style.setProperty('--tg-button-text-color', tg.buttonTextColor);
+document.body.style.setProperty('--tg-hint-color', tg.hintColor);
+
+// Следим за изменением темы
+tg.onEvent('themeChanged', function() {
+    document.body.style.backgroundColor = tg.backgroundColor;
+    document.body.style.color = tg.textColor;
+    document.body.style.setProperty('--tg-button-color', tg.buttonColor);
+    document.body.style.setProperty('--tg-button-text-color', tg.buttonTextColor);
+    document.body.style.setProperty('--tg-hint-color', tg.hintColor);
+});
+
+// Показываем главную кнопку
+tg.MainButton.setText('Отправить результат');
+tg.MainButton.show();
+tg.MainButton.onClick(sendToBot);
 
 function appendNumber(num) {
     currentExpression += num;
@@ -24,6 +39,12 @@ function appendOperator(op) {
     if (currentExpression.length > 0) {
         const lastChar = currentExpression[currentExpression.length - 1];
         if (!['+', '-', '*', '/', '^', '('].includes(lastChar)) {
+            currentExpression += op;
+            updateDisplay();
+        }
+    } else {
+        // Если выражение пустое, но оператор - это может быть унарный минус
+        if (op === '-') {
             currentExpression += op;
             updateDisplay();
         }
@@ -67,28 +88,30 @@ function calculate() {
     if (!currentExpression) return;
     
     try {
-        // Подготавливаем выражение
+        // Подготавливаем выражение для JavaScript
         let expr = currentExpression
             .replace(/×/g, '*')
             .replace(/÷/g, '/')
             .replace(/\^/g, '**')
             .replace(/π/g, 'Math.PI')
             .replace(/e/g, 'Math.E')
-            .replace(/sqrt/g, 'Math.sqrt')
-            .replace(/sin/g, 'Math.sin')
-            .replace(/cos/g, 'Math.cos')
-            .replace(/tan/g, 'Math.tan')
-            .replace(/log/g, 'Math.log10');
+            .replace(/sqrt\(/g, 'Math.sqrt(')
+            .replace(/sin\(/g, 'Math.sin(')
+            .replace(/cos\(/g, 'Math.cos(')
+            .replace(/tan\(/g, 'Math.tan(')
+            .replace(/log\(/g, 'Math.log10(');
         
         // Безопасное вычисление
         const result = Function('"use strict";return (' + expr + ')')();
         
         // Форматируем результат
         let formattedResult;
-        if (Math.abs(result) > 1e15 || Math.abs(result) < 1e-10) {
+        if (Math.abs(result) > 1e15 || (Math.abs(result) < 1e-10 && result !== 0)) {
             formattedResult = result.toExponential(10);
-        } else {
+        } else if (Number.isInteger(result)) {
             formattedResult = result.toString();
+        } else {
+            formattedResult = result.toFixed(10).replace(/\.?0+$/, '');
         }
         
         // Добавляем в историю
@@ -97,12 +120,13 @@ function calculate() {
         updateDisplay();
         
     } catch (error) {
-        alert('Ошибка в выражении: ' + error.message);
+        history.textContent = 'Ошибка: ' + error.message;
+        console.error(error);
     }
 }
 
 function sendToBot() {
-    if (currentExpression) {
+    if (currentExpression && history.textContent) {
         // Отправляем результат обратно боту
         tg.sendData(JSON.stringify({
             type: 'calculation_result',
@@ -125,7 +149,3 @@ function closeApp() {
 tg.onEvent('mainButtonClicked', function() {
     sendToBot();
 });
-
-// Показываем главную кнопку
-tg.MainButton.setText('Отправить результат');
-tg.MainButton.show();
