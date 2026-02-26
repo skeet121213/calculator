@@ -4,7 +4,7 @@ let currentExpression = '';
 
 // Инициализация Telegram WebApp
 const tg = window.Telegram.WebApp;
-tg.expand(); // expand, не extend!
+tg.expand();
 tg.enableClosingConfirmation();
 
 // Применяем цвета темы Telegram
@@ -101,6 +101,14 @@ function calculate() {
             .replace(/tan\(/g, 'Math.tan(')
             .replace(/log\(/g, 'Math.log10(');
         
+        // Для отладки выведем в консоль
+        console.log('Выражение для вычисления:', expr);
+        
+        // Проверка на пустоту после замены
+        if (!expr.trim()) {
+            throw new Error('Пустое выражение');
+        }
+        
         // Безопасное вычисление
         const result = Function('"use strict";return (' + expr + ')')();
         
@@ -121,7 +129,7 @@ function calculate() {
         
     } catch (error) {
         history.textContent = 'Ошибка: ' + error.message;
-        console.error(error);
+        console.error('Ошибка вычисления. Исходное выражение:', currentExpression, 'Преобразованное:', expr, 'Ошибка:', error);
     }
 }
 
